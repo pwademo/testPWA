@@ -1,12 +1,13 @@
 
 // Files to cache
-const version="1.0.6";
+const version="1.0.16";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
   '/testPWA/',
   '/testPWA/index.html',
   '/testPWA/about.html',
+  '/testPWA/navbar.js',  
   '/testPWA/navbar.html',
   '/testPWA/app.js',
   '/testPWA/style.css',
@@ -17,17 +18,35 @@ const appShellFiles = [
 ];
 
 
-self.addEventListener('install', (e) => {
+/* self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches
       .open(cacheName)
-      .then((cache) =>
+      .then((cache) =>{
         cache.addAll(appShellFiles)
+      }        
+      )
+  );
+}); */
+ self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches
+      .open(cacheName)
+      .then((cache) =>{
+        appShellFiles.forEach(
+              async file=>{
+                const filewithparam= `${file}?x=${version}`;
+                console.log(filewithparam);                
+                const response = await fetch(filewithparam);//fetch med parm for at omgå http/browser cache
+                cache.put(file, response); //put tilbage, men uden parm
+              }                     
+          )
+      }        
       )
   );
 });
-
 
 
 self.addEventListener('activate', function (event) {
