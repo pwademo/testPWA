@@ -1,6 +1,6 @@
 
 // Files to cache
-const version="1.0.5";
+const version="1.0.6";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
