@@ -1,6 +1,6 @@
 
 // Files to cache
-const version="1.0.2";
+const version="1.0.4";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
@@ -29,14 +29,7 @@ self.addEventListener('install', (e) => {
 });
 
 
-/* self.addEventListener('activate', (e) => {
-    e.waitUntil(caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        if (key === cacheName) { return; }
-        return caches.delete(key);
-      }));
-    }));
-}); */
+
 self.addEventListener('activate', function (event) {
 	event.waitUntil(caches.keys().then(function (keys) {
 		return Promise.all(keys.filter(function (key) {
