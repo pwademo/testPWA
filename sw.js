@@ -12,8 +12,15 @@ const appShellFiles = [
   '/testPWA/app.js',
   '/testPWA/style.css',
   '/testPWA/manifest.json',
-  '/testPWA/icons/icon192.png',
-  '/testPWA/icons/icon512.png',
+  '/testPWA/icons/icon-48x48.png',
+  '/testPWA/icons/icon-72x72.png',
+  '/testPWA/icons/icon-96x96.png',
+  '/testPWA/icons/icon-128x128.png',
+  '/testPWA/icons/icon-144x144.png',
+  '/testPWA/icons/icon-152x152.png',
+  '/testPWA/icons/icon-192x192.png',
+  '/testPWA/icons/icon-384x384.png',
+  '/testPWA/icons/icon-512x512.png',
   '/testPWA/favicon.ico'
 ];
 
@@ -76,7 +83,7 @@ self.addEventListener('message', event => {
         .open(cacheName)
         .then(async (cache) =>{
           const random=+ Math.floor(Math.random() * 1000);
-          const response = await fetch(`index.html?x=${random}`);//bypass html cache med andom parm
+          const response = await fetch(`index.html?x=${random}`);//bypass html cache med random parm
           console.log(`index.html?x=${random}`);
           cache.put("index.html", response); //put tilbage uden parm
           
