@@ -1,6 +1,6 @@
 
 // Files to cache
-const version="1.0.18";
+const version="1.0.59";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
@@ -25,6 +25,9 @@ const appShellFiles = [
 ];
 
 
+
+
+
 /* self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
@@ -36,7 +39,9 @@ const appShellFiles = [
       )
   );
 }); */
- self.addEventListener('install', (e) => {
+/* */  
+/* 
+self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches
@@ -47,13 +52,49 @@ const appShellFiles = [
                 const filewithparam= `${file}?x=${version}`;
                 console.log(filewithparam);                
                 const response = await fetch(filewithparam);//fetch med parm for at omgå http/browser cache
+
+
                 cache.put(file, response); //put tilbage, men uden parm
               }                     
           )
       }        
       )
   );
-});
+}); */
+
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches
+      .open(cacheName)
+      .then((cache) =>{
+        appShellFiles.forEach(
+              async file=>{
+                const filewithparam= `${file}?x=${version}`;
+                //console.log(filewithparam);                
+                const response = await fetch(filewithparam);//fetch med parm for at omgå http/browser cache
+
+                //Her tilføjes header til fil så vi er sikker på versionen
+                const newHeaders = new Headers(response.headers);
+                newHeaders.append('x-my-version', version);
+                
+                const responseExtra = new Response(response.body, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: newHeaders
+                });
+                //console.log("New Headers",new Map(responseExtra.headers))
+
+                cache.put(file, responseExtra); //put tilbage, men uden parm
+              }                     
+          )
+      }        
+      )
+  );
+}); 
+
+
+
 
 
 self.addEventListener('activate', function (event) {
@@ -69,14 +110,66 @@ self.addEventListener('activate', function (event) {
 });
 
 
+async function getFilesInCacheWithVersion(){
+    let obj={};
+    appShellFiles.forEach(
+      async file=>{ 
+           const req =await caches.match(file).then((res)=>{    
+              let version=res.headers.has('x-my-version')?res.headers.get('x-my-version'):"N/A";
+              obj[file]=version;
+            }
+        );
+      } 
+    );
+    return obj;
+}
+
+
+
+
+
 self.addEventListener('message', event => {
   let data=event.data;
   //console.log(`The client sent me a message: ${data}`);
 
+  //#########################################################
   if("getVersion" in data){
+    
     event.source.postMessage({"cacheVersion": version});
-  }
+  } 
 
+
+  //#########################################################
+  if("getFileNamesInCache" in data){
+     
+    let myPromise = new Promise(async function(myResolve, myReject) {
+      let myArr=[];
+      for (let index = 0; index < appShellFiles.length; index++) {
+        const file = appShellFiles[index];
+        caches.match(file)
+          .then((res)=>
+            {    
+              let version=res.headers.has('x-my-version')?res.headers.get('x-my-version'):"N/A";
+              myArr.push([file,version]);
+              //console.log(appShellFiles.length);
+              if(index== appShellFiles.length-1){
+                  //console.table(myArr);
+                  myResolve(myArr);   //Først når alle filer er lagt i myArr med versionsnummer sendes videre til myPromise.then
+              }   
+            }    
+          )
+      } 
+    });   
+
+    myPromise.then(
+      function(myArr) {
+        event.source.postMessage({"fileNamesInCache": myArr});      
+      }
+    );      
+
+  } 
+
+  //#########################################################
   if("refreshCache" in data){
     event.waitUntil(
       caches      
@@ -84,56 +177,47 @@ self.addEventListener('message', event => {
         .then(async (cache) =>{
           const random=+ Math.floor(Math.random() * 1000);
           const response = await fetch(`index.html?x=${random}`);//bypass html cache med random parm
-          console.log(`index.html?x=${random}`);
-          cache.put("index.html", response); //put tilbage uden parm
-          
+          //console.log(`index.html?x=${random}`);
+          cache.put("index.html", response); //put tilbage uden parm          
         }
-
         )
-    )
-    
-    ;
+    );
     event.source.postMessage({"cacheVersion": version});
   }
 
-  if("checkOnline" in data){
+  //#########################################################
+
+/**/   
+
+ if("checkOnline" in data){
     let url="/test.png";//Må ikke lægges i cache
-    let req=new Request(url, {method:"HEAD",});
-    fetch(req)
+    //console.log(req);
+    fetch(url)
       .then(
         response=>{
-        console.log("Vi ved med sikkerhed at vi er online da der kommer svar fra serveren");
-        event.source.postMessage({"isOnline": true});
+          //console.log("Vi ved med sikkerhed at vi er online da der kommer svar fra serveren");
+          event.source.postMessage({"isOnline": true});
         },
         (error)=>{
           console.log("Vi ved med sikkerhed at vi er offline");
           event.source.postMessage({"isOnline": false});
         }    
       )
-  }
+  } 
 
 }); 
 
 // Fetching content using Service Worker
 self.addEventListener('fetch', (e) => {
-  e.respondWith((async () => {
-    //console.log(`Cache version ${version}`);
-  
-    //console.log(e.request);
+    e.respondWith((async () => {
+        const req = await caches.match(e.request);
+        if (req) return req; 
 
-
-    const req = await caches.match(e.request);
-    //console.log(`[Service Worker] Fetching resource: ${e.request.url}`);
-    if (req) return req; 
-
-    const response = await fetch(e.request);
-    /*
-    const cache = await caches.open(cacheName);
-    console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
-    cache.put(e.request, response.clone()); 
-    */
-    return response; 
-  })());
+        //Nået hertil ved vi at filen ikke var i cache
+        //Derfor hentes den fra server
+        const response = await fetch(e.request);
+        return response; 
+    })());
   
 });
 

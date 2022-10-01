@@ -22,11 +22,25 @@ if ('serviceWorker' in navigator) {
         if("cacheVersion" in data){
             document.getElementById("cacheVersion").innerHTML = `Cache version: ${data.cacheVersion}`;
         }
+        if("fileNamesInCache" in data){
+            console.log("Filer med verionsnummer i cache")
+            console.table(data.fileNamesInCache);
+/*             data.fileNamesInCache.forEach((item, index)=>{
+                //console.log(item,index);
+                document.getElementById("fileNamesInCache").innerHTML+=`${item}</br>`;
+            }); */
+
+            //document.getElementById("fileNamesInCache").innerHTML = `Filenames in cache: ${data.fileNamesInCache}`;
+        }
         if("isOnline" in data){
+            console.log("######################################################");
+            console.log(data.isOnline);
             document.getElementById("isOnline").innerHTML = `Is Online confirmed by fetch call to server: ${data.isOnline}`;
         }
     });
-    
+    function myFunction(item, index) {
+        text += index + ": " + item + "<br>"; 
+      }
 
     const installedMode=document.getElementById("installedMode");
     if(navigator.standalone){
@@ -44,7 +58,8 @@ if ('serviceWorker' in navigator) {
     //Send forspørgelse til SW
     navigator.serviceWorker.ready.then( registration => {
         registration.active.postMessage({
-            "getVersion":true
+            "getVersion":true,
+            "getFileNamesInCache":true
         });
 
        
@@ -89,6 +104,15 @@ function tjekOnlineStatusForSure(){
         registration.active.postMessage({"checkOnline":true});
     });  
 }
+
+
+//getFilenamesInCache
+function getFilenamesInCache(){
+    navigator.serviceWorker.ready.then( registration => {
+        registration.active.postMessage({"getFilenamesInCache":true});
+    });  
+}
+
 
 
         let db=null;
