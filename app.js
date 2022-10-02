@@ -33,8 +33,7 @@ if ('serviceWorker' in navigator) {
             data.fileNamesInCache.forEach((item, index)=>{
                 //console.log(item,index);
                 document.getElementById("fileNamesInCache").innerHTML+=`${item[0]} ${item[1]}</br>`;
-            }); 
-            
+            });             
 
             //document.getElementById("fileNamesInCache").innerHTML = `Filenames in cache: ${data.fileNamesInCache}`;
         }
