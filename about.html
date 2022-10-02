@@ -21,35 +21,39 @@
     <link rel="manifest" href="manifest.json"> 
 
     
-    
+    <script src="app.js" defer></script>
     <script src="navbar.js" defer></script>
 </head>
 <body>
     <nav class="navbar">
 
     </nav>
+
+    
     <section>
-    <h1>
-        About
-    </h1>
-</section>
-<!--  -->    
+        <h1 style="color:blueviolet">
+          About
+       </h1>
+   
+ <!--       <p id="cacheVersion">Cache version ...</p> -->
+ <p id="isProbablyOnline">Is Probably ...</p>
+ <p id="isOnline">Is Online confirmed by fetch call to server ...</p>
+ <p id="installedMode">Install mode ...</p>       
+<p>
+ <button class="btn" id="btnAdd">Add</button>
+ <button class="btn" id="btnGetList">Get list</button>   
+ 
+<!--  <button class="btn" id="btnRefreshCache">Refresh Cache</button>  -->  
+ <button class="btn" id="btnListFilesInCache">List files in Cache</button>   
+</p>
+<p>
+  <ul id="listItems"></ul>
+</p>    
+<hr/>
+ <p id="fileNamesInCache" style="font-size:xx-small;"></p>
+ <hr/>
+   </section>
 
 
-<!--     <p id="cacheVersion"></p>
-    <p id="isProbablyOnline"></p>
-    <p id="isOnline"></p>
-    <p id="installedMode"></p>
-       
-   <p>
-    <button id="btnAdd">Add</button>
-    <button id="btnGetList">Get list</button>   
-   </p>
-
-
-
-   <p>
-     <ul id="listItems"></ul>
-   </p> -->
 </body>
 </html>

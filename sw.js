@@ -1,6 +1,6 @@
 
 // Files to cache
-const version="1.0.59";
+const version="1.0.67";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
@@ -70,11 +70,13 @@ self.addEventListener('install', (e) => {
       .then((cache) =>{
         appShellFiles.forEach(
               async file=>{
-                const filewithparam= `${file}?x=${version}`;
-                //console.log(filewithparam);                
-                const response = await fetch(filewithparam);//fetch med parm for at omgå http/browser cache
 
-                //Her tilføjes header til fil så vi er sikker på versionen
+                /* #region fetch with parameter to avoid http/browser cache */
+                const filewithparam= `${file}?x=${version}`;             
+                const response = await fetch(filewithparam);
+                /* #endregion  */
+
+                /* #region add header version-number in headers */
                 const newHeaders = new Headers(response.headers);
                 newHeaders.append('x-my-version', version);
                 
@@ -83,9 +85,9 @@ self.addEventListener('install', (e) => {
                   statusText: response.statusText,
                   headers: newHeaders
                 });
-                //console.log("New Headers",new Map(responseExtra.headers))
+                /* #endregion  */
 
-                cache.put(file, responseExtra); //put tilbage, men uden parm
+                cache.put(file, responseExtra); //put to cache with original filename
               }                     
           )
       }        
@@ -133,8 +135,7 @@ self.addEventListener('message', event => {
   //console.log(`The client sent me a message: ${data}`);
 
   //#########################################################
-  if("getVersion" in data){
-    
+  if("getVersion" in data){    
     event.source.postMessage({"cacheVersion": version});
   } 
 
@@ -149,12 +150,17 @@ self.addEventListener('message', event => {
         caches.match(file)
           .then((res)=>
             {    
+              /*  
+                for (const pair of res.headers.entries()) {
+                console.log(pair[0]+ ': '+ pair[1]);
+                }
+              console.log("==============XXXXXXXXXXXXXXXXXXX=================="); */
               let version=res.headers.has('x-my-version')?res.headers.get('x-my-version'):"N/A";
               myArr.push([file,version]);
               //console.log(appShellFiles.length);
               if(index== appShellFiles.length-1){
                   //console.table(myArr);
-                  myResolve(myArr);   //Først når alle filer er lagt i myArr med versionsnummer sendes videre til myPromise.then
+                  myResolve(myArr);   //Først når alle filer er lagt i myArr med versionsnummer sendes der videre til myPromise.then
               }   
             }    
           )

@@ -19,19 +19,26 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', event => {
         let data=event.data;
         //console.log("Message fra SW",data);
+        /* *************** */
         if("cacheVersion" in data){
-            document.getElementById("cacheVersion").innerHTML = `Cache version: ${data.cacheVersion}`;
+            document.getElementById("cacheVersion").innerHTML = `Version: ${data.cacheVersion}`;
         }
+        /* *************** */
         if("fileNamesInCache" in data){
             console.log("Filer med verionsnummer i cache")
             console.table(data.fileNamesInCache);
-/*             data.fileNamesInCache.forEach((item, index)=>{
+            /*   */        
+            document.getElementById("fileNamesInCache").innerHTML="";
+            
+            data.fileNamesInCache.forEach((item, index)=>{
                 //console.log(item,index);
-                document.getElementById("fileNamesInCache").innerHTML+=`${item}</br>`;
-            }); */
+                document.getElementById("fileNamesInCache").innerHTML+=`${item[0]} ${item[1]}</br>`;
+            }); 
+            
 
             //document.getElementById("fileNamesInCache").innerHTML = `Filenames in cache: ${data.fileNamesInCache}`;
         }
+        /* *************** */
         if("isOnline" in data){
             console.log("######################################################");
             console.log(data.isOnline);
@@ -58,11 +65,10 @@ if ('serviceWorker' in navigator) {
     //Send forspørgelse til SW
     navigator.serviceWorker.ready.then( registration => {
         registration.active.postMessage({
-            "getVersion":true,
-            "getFileNamesInCache":true
-        });
-
-       
+            "getVersion":true
+/*             ,
+            "getFileNamesInCache":true */
+        });       
     });
 
 }
@@ -192,16 +198,24 @@ function getFilenamesInCache(){
         }
     );
 
-    document.getElementById("btnRefreshCache").addEventListener("click", 
+/*     document.getElementById("btnRefreshCache").addEventListener("click", 
     async (event)=> {
         event.preventDefault();
       
         navigator.serviceWorker.ready.then( registration => {
             registration.active.postMessage({"refreshCache":true});
         });  
-    }
-);
-
+    } 
+);*/
+/* */    
+        document.getElementById("btnListFilesInCache").addEventListener("click", 
+        async (event)=> {
+            event.preventDefault();
+            navigator.serviceWorker.ready.then( registration => {
+                registration.active.postMessage({"getFileNamesInCache":true});
+            });
+        }
+        );
 
         document.getElementById("btnGetList").addEventListener("click", 
             async (event)=> {
