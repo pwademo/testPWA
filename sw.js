@@ -1,6 +1,6 @@
 
 // Files to cache
-const version="1.0.77" ;
+const version="1.0.72";
 const cacheName = `${version}_static`;
 const cacheNames=[cacheName];
 const appShellFiles = [
@@ -11,6 +11,7 @@ const appShellFiles = [
   '/testPWA/navbar.html',
   '/testPWA/app.js',
   '/testPWA/style.css',
+  '/testPWA/styles.css',
   '/testPWA/manifest.json',
   '/testPWA/icons/icon-48x48.png',
   '/testPWA/icons/icon-72x72.png',
