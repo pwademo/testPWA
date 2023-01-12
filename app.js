@@ -64,6 +64,14 @@ const mySchema=[
         type: "month",
         placeholder:"Select month",
         width:"120px"
+    },
+    {
+        name: "picture",
+        displayname:"Picture",
+        value:"",
+        type: "file",
+        placeholder:"Select file",
+        width:"520px"
     }
 ]
 
@@ -189,6 +197,31 @@ const createElementTableHead = ()=>{
     return tr;
 }
 
+
+const convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+
+        fileReader.onload = () => {
+            resolve(fileReader.result);
+        };
+
+        fileReader.onerror = (error) => {
+            reject(error);
+        };
+    });
+};
+
+const uploadImage = async (event) => {
+    const file = event.target.files[0];
+    const base64 = await convertBase64(file);
+    //console.log(base64);
+    return base64;
+/*     avatar.src = base64;
+    textArea.innerText = base64; */
+};
+
 const createElementUI = (id, data)=>{
     //tr table row
     const tr = document.createElement("TR");
@@ -208,28 +241,52 @@ const createElementUI = (id, data)=>{
 
    //append fields from schema
    for (const [key, value] of Object.entries(mySchema)) {         
-          
+          console.log(value.type);
+
+
+
           const td = document.createElement("TD");       
-          const _input = document.createElement("INPUT");  
-          _input.value= data[value.name]===undefined?"":data[value.name];
+          const _input = document.createElement("INPUT"); 
+          
+          const valuefromdb=data[value.name]===undefined?"":data[value.name];
+          _input.value= valuefromdb;
           _input.type=value.type;
           _input.placeholder=value.placeholder;
          // _input.setAttribute("spellcheck", "false");
           _input.style.width=value.width;
           td.appendChild(_input);
           tr.appendChild(td);
-          _input.addEventListener("change", ()=>{
-              let obj = {};           
+
+          if(value.type==="file" && valuefromdb!=""){
+            const img0 = document.createElement("IMG");    
+            img0.width=60;
+            img0.src=valuefromdb;
+            td.appendChild(img0); 
+          }
+
+          _input.addEventListener("change",async (e)=>{              
+              let obj = {};      
+              if(e.target.type==="file")
+              {
+                const base64=await uploadImage(e); 
+                obj[value.name] =base64;
+                //remove img-tag from UI if img-tag alraedy exist
+                const imgexisting=td.querySelector("IMG");
+                if(imgexisting){imgexisting.remove();}
+
+                const img = document.createElement("IMG");    
+                img.width=60;
+                img.src=base64;
+                td.appendChild(img); 
+                
+              } 
+              else {
               obj[value.name] =_input.value;   
+              } 
+
               editObject(id, obj)
           });
-/*           _input.addEventListener("blur", ()=>{
-           //alert("blur");
-            isBlured=true;
-              let obj = {};           
-              obj[value.name] =_input.value;   
-              editObject(id, obj)
-          }); */
+
     }  
 
     return tr
