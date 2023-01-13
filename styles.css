@@ -31,6 +31,20 @@ background-color: lightgray;
     font-size: x-small;
 }
 
+.btn_img {
+     height: 1.6rem; 
+    border: 1px solid #000;
+    width: 70px;    
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-left: 5px;
+   
+}
+.btn_img:active {
+    background-color: #ddd;
+
+}
+
 .btn_delete:hover{
     background-color: rgb(179, 11, 11);
 }
@@ -57,6 +71,14 @@ background-color: lightgray;
 }
 .tablebody input[type=date] {
     text-align: center; 
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.tablebody input[type=month] {
+    text-align: center; 
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
 }
 .tablebody input[type=color] {
     text-align: right; 

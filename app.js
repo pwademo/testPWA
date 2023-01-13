@@ -257,12 +257,22 @@ const createElementUI = (id, data)=>{
           td.appendChild(_input);
           tr.appendChild(td);
 
-          if(value.type==="file" && valuefromdb!=""){
+          if(value.type==="file" ){
+            td.style.display="inline-flex";
+            _input.style.display="none";//hide file input button
+            const btn= document.createElement("BUTTON");
+            btn.type="button";
+            btn.classList.add("btn_img");
+            btn.innerText="Upload img";
+            btn.addEventListener("click",()=>{
+                _input.click();
+            });
             const img0 = document.createElement("IMG");    
-            img0.width=60;
+            img0.width=120;
             img0.src=valuefromdb;
+            td.appendChild(btn);
             td.appendChild(img0); 
-          }
+          } 
 
           _input.addEventListener("change",async (e)=>{              
               let obj = {};      
@@ -275,7 +285,7 @@ const createElementUI = (id, data)=>{
                 if(imgexisting){imgexisting.remove();}
 
                 const img = document.createElement("IMG");    
-                img.width=60;
+                img.width=120;
                 img.src=base64;
                 td.appendChild(img); 
                 
