@@ -1,0 +1,122 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="diverror" style="color:red"></div>
+<div id="divdebug" style="color:green">DEBUG:<br/></div>
+<a href="index.html">Menu</a>
+<h1>Index1</h1>
+<p>Helt simpelt index type file til Base64 og img</p>
+
+
+<div class="wrapper" style="border: solid red 1px;">
+    <!-- Disse to knapper har tilsluttet eventlisentner -->         
+    <p>
+        <input type="file" name="" id="" class="fileinput">
+    </p> 
+    <p>
+    <button class="btn-upload-image" id="btnImage"><i class="fa fa-camera"></i> Billede</button></p>
+    <p><span class="spanInfo"></span></p>    
+    <p><img class="img-thumnail" src="" alt=""></p>
+    <input type="text" class="hiddenBase64">
+</div>   
+
+
+<script>    
+           // const btnUploadImage=document.querySelectorAll(".btn-upload-image");
+           const btnUploadImage=document.getElementById("btnImage");
+            //const btnRotateImage=document.querySelector(".btn-rotate-image");
+
+
+            const convertImgToResizedBase64 = (file) => {
+                    const max_size = 600;//max width or height
+
+                    divdebug.innerHTML += " START convertImgToResizedBase64" + "<br/>";
+                    divdebug.innerHTML += "Filetype" + file.type + "<br/>";
+
+
+                    return new Promise((resolve, reject) => {            
+                        let allowedExtension = ['image/jpeg', 'image/jpg', 'image/png','image/gif','image/bmp'];            
+                        if (allowedExtension.indexOf(file.type)===-1) {
+                            reject(`${file.type} is not a valid filetype`);
+                            divdebug.innerHTML += `${file.type} is not a valid filetype` + "<br/>";
+                        }
+                        const fileReader = new FileReader();
+                        fileReader.readAsDataURL(file);
+                        fileReader.onload = (ev) => {
+                            const image = new Image();                    
+                                image.src = ev.target.result;
+                                image.onload = (imageEvent) =>
+                                {                        
+                                    let w = image.width;
+                                    let h = image.height;        
+                                    if (w > h) {  if (w > max_size) { h*=max_size/w; w=max_size; }
+                                    } else     {  if (h > max_size) { w*=max_size/h; h=max_size; } }
+                    
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = w;
+                                    canvas.height = h;
+                                    canvas.getContext('2d').drawImage(image, 0, 0, w, h);
+                                    //const dataURL = canvas.toDataURL("image/jpeg",1.0);
+                                    const dataURL = canvas.toDataURL("image/jpeg");
+                                   // image.onload = null;//clean up memory
+                                    resolve(dataURL);
+                                }           
+                    };
+                    fileReader.onerror = (error) => {
+                        divdebug.innerHTML += `fileReader.onerror ${error}` + "<br/>";
+                        reject(error);
+                    };
+                });
+            };
+
+
+
+
+
+
+              //Button take foto
+              btnUploadImage.addEventListener("click",function(e){
+                    e.preventDefault();
+                    //traverse up to parent div 
+                    const wrapper=this.closest(".wrapper");
+                    const spanInfo=wrapper.querySelector(".spanInfo");
+                    const hiddenBase64=wrapper.querySelector(".hiddenBase64");
+                    const imgThumnail=wrapper.querySelector(".img-thumnail");
+                    const divBtnRotate=wrapper.querySelector(".div-btn-rotate");
+                    const fileinput=wrapper.querySelector(".fileinput"); 
+                    
+                    fileinput.addEventListener("change",async (e)=>{                                   
+                        if(e.target.type==="file")
+                        {     
+                               
+                                let file=e.target.files[0];
+                            
+                                const base64=await convertImgToResizedBase64(file);  
+                              //  let stripedbase64=stripBase64(base64);
+
+                                //set size in info                                                    
+                               //spanInfo.innerText=`Billede er klar til upload (${getSizeOfBase64InMb(stripedbase64)} Mb)`; 
+                                //divBtnRotate.style.display = "block";
+
+                                //display img
+                                imgThumnail.src=base64;
+                            
+                                //set value in hidden input 
+                                hiddenBase64.value=base64;                                         
+                            
+                        } 
+
+                    } );
+                    fileinput.click();//virtuel click on fileinput
+                    
+
+                });
+
+</script>
+</body>
+</html>
