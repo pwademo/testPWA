@@ -11,13 +11,13 @@ body {
     
 }
 
-#btn_add{
+#btn_add, #btn_zip{
     height: 1.6rem;
     border: 1px solid #000;
     width: 70px;    
     border-radius: 4px;
 }
-#btn_add:hover{
+#btn_add:hover, #btn_zip:hover{
 background-color: lightgray;
 }
 

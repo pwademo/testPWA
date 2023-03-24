@@ -108,6 +108,15 @@ document.getElementById("btn_add").addEventListener("click", ()=>{
     readObject();
 });
 
+
+document.getElementById("btn_zip").addEventListener("click", ()=>{      
+      const _tmp=makeZip();
+      console.log(_tmp);
+});
+
+
+
+
 const addObject = (object)=>{
     const IDBData = getIDBData("readwrite");
     IDBData.store.add(object);
@@ -133,7 +142,12 @@ const readObject = ()=>{
     mytablebody.innerHTML = "";
 
     cursor.addEventListener("success", ()=>{
+
+
         if(cursor.result){
+            const _pic=cursor.result.value["picture"];
+            console.log("Pic",_pic);
+
             let element = createElementUI(cursor.result.key, cursor.result.value);
             fragment.appendChild(element);
             cursor.result.continue();
@@ -143,6 +157,68 @@ const readObject = ()=>{
         };
     });
 };
+
+
+const makeZip = ()=>{
+    const IDBData = getIDBData("readonly");
+    IDBData.store.openCursor();
+    IDBData.transaction.addEventListener("complete", ()=>{
+        console.log("Object added");
+    });
+
+    const cursor = IDBData.store.openCursor(null, 'prev');
+
+    const zip=new JSZip();
+
+    //const fragment = document.createDocumentFragment();
+
+    //mytablehead.innerHTML = "";
+    //let headrow=createElementTableHead();
+    //mytablehead.appendChild(headrow);
+
+    //mytablebody.innerHTML = "";
+
+    cursor.addEventListener("success",async ()=>{
+
+
+        if(cursor.result){
+            const _base64=cursor.result.value["picture"];
+            const _filename=`picture${cursor.result.key}.jpeg`;
+            console.log("_base64",_base64);
+            const _blob=convertBase64ToBlob(_base64);
+            console.log(_blob);
+            zip.file(_filename,_blob);
+
+/*             let element = createElementUI(cursor.result.key, cursor.result.value);
+            fragment.appendChild(element); */
+            cursor.result.continue();
+        } else{
+            //when there is no more data to add to the fragment
+            //mytablebody.appendChild(fragment);
+
+            const zipfile=await zip.generateAsync({type:'blob'});
+            console.log("zipfile",zipfile);
+            downloadZip(zipfile);
+        };
+    });
+};
+
+
+
+function downloadZip(file){
+    const a=document.createElement("a");
+    a.download="test.zip";
+
+    const url=URL.createObjectURL(file);
+    a.href=url;
+
+    a.style.display="none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}   
+
 
 const editObject = (key, fieldData)=>{
     const IDBData = getIDBData("readwrite");
@@ -179,7 +255,7 @@ const getIDBData = (mode)=>{
     let IDBData={};
     IDBData["store"]=objectStore;
     IDBData["transaction"]=IDBtransaction;
-    console.log(IDBData);
+    console.log("IDBData",IDBData);
     return IDBData;
 };
 
@@ -197,7 +273,7 @@ const createElementTableHead = ()=>{
     return tr;
 }
 
-
+//convert file to base64
 const convertBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const fileReader = new FileReader();
@@ -212,6 +288,29 @@ const convertBase64 = (file) => {
         };
     });
 };
+
+
+//remove data:image part from a base64 string
+const stripBase64=(base64)=>{
+    return base64.replace(/^data:image\/[a-z]+;base64,/, "");
+}
+
+const convertBase64ToBlob=(base64Data)=>{
+    //console.log(base64Data);
+
+
+    //base64Data="iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAHFJREFUWIXt1jsKgDAQRdF7xY25cpcWC60kioI6Fm/ahHBCMh+BRmGMnAgEWnvPpzK8dvrFCCCAcoD8og4c5Lr6WB3Q3l1TBwLYPuF3YS1gn1HphgEEEABcKERrGy0E3B0HFJg7C1N/f/kTBBBA+Vi+AMkgFEvBPD17AAAAAElFTkSuQmCC"
+    
+    const byteCharacters = atob(stripBase64(base64Data));
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], {type: 'image/jpeg'});
+    return blob;
+}
+
 
 const uploadImage = async (event) => {
     const file = event.target.files[0];
